@@ -42,8 +42,9 @@ const threadCode = `
     }, {delimiter: ';'});`
 
 const args = process.argv.slice(2);
+args[0] = +args[0];
 
-let part = Math.floor(args[0] / numCPUs);
+let part = Math.floor((args[0]) / (numCPUs - 1));
 let vars = {
     part,
     threadCode,
@@ -51,14 +52,14 @@ let vars = {
 }
 
 const threads = [];
-for(let i = 0; i <= numCPUs; i++) {
+for(let i = 0; i < numCPUs; i++) {
     threads.push(Async.execute((vars) => {
         eval(`let len = ${vars.part}, lang='${vars.lang}'; ${vars.threadCode}`);
     }, vars));
 }
 threads.push(Async.execute((vars) => {
     eval(`let len = ${vars.part}, lang='${vars.lang}'; ${vars.threadCode}`);
-}, {threadCode, part: args[0] % numCPUs,lang: args[1]}));
+}, {threadCode, part: args[0] % (numCPUs - 1),lang: args[1]}));
 
 Promise.all(threads).finally(process.exit)
 
